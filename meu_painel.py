@@ -14,58 +14,44 @@ def converter_imagem_local(caminho_imagem):
             return base64.b64encode(image_file.read()).decode()
     return ""
 
-# Caminhos das imagens na sua pasta do projeto
+# Caminhos das imagens (caminhos relativos para a nuvem)
 img_ufpb_base64 = converter_imagem_local("logo_ufpb.png")
 img_proex_base64 = converter_imagem_local("logo_proex.png")
 
 # ==========================================
-# 2. IDENTIDADE VISUAL PROEX (CSS ATUALIZADO)
+# 2. IDENTIDADE VISUAL PROEX (CSS)
 # ==========================================
 COR_AZUL = "#2D2E83"
 COR_VERMELHA = "#E30613"
 
 st.markdown(f"""
     <style>
-    /* Novo Estilo do Cabeçalho: Fundo Branco com Moldura Azul e Base Vermelha */
     .cabecalho-proex {{
         background-color: #FFFFFF;
         padding: 20px 30px;
         border-radius: 10px;
-        border: 3px solid {COR_AZUL}; /* Moldura azul */
-        border-bottom: 7px solid {COR_VERMELHA}; /* Mantém o detalhe em vermelho */
+        border: 3px solid {COR_AZUL};
+        border-bottom: 7px solid {COR_VERMELHA};
         display: flex;
         align-items: center;
         justify-content: space-between;
         margin-bottom: 25px;
-        box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.05); /* Sombra leve para dar elegância */
+        box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.05);
     }}
-    .logo-img {{
-        height: 80px;
-        object-fit: contain;
-    }}
-    .titulo-container {{
-        text-align: center;
-        flex-grow: 1;
-    }}
+    .logo-img {{ height: 80px; object-fit: contain; }}
+    .titulo-container {{ text-align: center; flex-grow: 1; }}
     .titulo-container h1 {{
-        color: {COR_AZUL}; /* Fonte no Azul PROEX */
-        margin: 0;
-        font-size: 2.2rem;
-        font-family: 'Arial', sans-serif;
-        font-weight: bold;
+        color: {COR_AZUL}; margin: 0; font-size: 2.2rem;
+        font-family: 'Arial', sans-serif; font-weight: bold;
     }}
     .titulo-container h3 {{
-        color: {COR_AZUL}; /* Fonte também no Azul PROEX */
-        margin: 5px 0 0 0;
-        font-size: 1.1rem;
-        font-family: 'Arial', sans-serif;
-        font-weight: 600;
-        opacity: 0.9;
+        color: {COR_AZUL}; margin: 5px 0 0 0; font-size: 1.1rem;
+        font-family: 'Arial', sans-serif; font-weight: 600; opacity: 0.9;
     }}
     </style>
 """, unsafe_allow_html=True)
 
-# 3. Renderização do Cabeçalho com as duas Logos Dinâmicas
+# 3. Renderização do Cabeçalho
 src_ufpb = f"data:image/png;base64,{img_ufpb_base64}" if img_ufpb_base64 else ""
 src_proex = f"data:image/png;base64,{img_proex_base64}" if img_proex_base64 else ""
 
@@ -83,9 +69,8 @@ st.markdown(f"""
 # 4. Carregando os dados
 @st.cache_data
 def carregar_dados():
-    # O arquivo está na mesma pasta, então basta o nome dele!
+    # Caminho relativo para a nuvem
     caminho = 'base_painel_2020_2025.csv'
-    
     dados = pd.read_csv(caminho)
     if len(dados.columns) == 1:
         dados = pd.read_csv(caminho, sep=';')
@@ -95,16 +80,13 @@ def carregar_dados():
         'CENTRO DE ENSINO', 'Data Inicio', 'Data Fim',  
         'Situacao', 'Status_macro', 'Fonte Financiamento'
     ]
-    
     colunas_existentes = [col for col in ordem_colunas if col in dados.columns]
-    dados = dados[colunas_existentes]
-    
-    return dados
+    return dados[colunas_existentes]
 
 df = carregar_dados()
 
 # ==========================================
-# 5. ÁREA DE FILTROS (Na Horizontal)
+# 5. ÁREA DE FILTROS
 # ==========================================
 st.subheader("🔍 Filtros de Análise")
 col_filtro1, col_filtro2, col_filtro3, col_filtro4 = st.columns(4)
@@ -114,7 +96,7 @@ with col_filtro1:
     filtro_ano = st.multiselect("Selecione o Ano:", lista_anos)
 
 with col_filtro2:
-    lista_centros = sorted(df['Centro de Ensino'].astype(str).unique())
+    lista_centros = sorted(df['CENTRO DE ENSINO'].astype(str).unique())
     filtro_centro = st.multiselect("Selecione o Centro de Ensino:", lista_centros)
 
 with col_filtro3:
@@ -133,7 +115,7 @@ df_filtrado = df.copy()
 if filtro_ano:
     df_filtrado = df_filtrado[df_filtrado['Ano Projeto'].isin(filtro_ano)]
 if filtro_centro:
-    df_filtrado = df_filtrado[df_filtrado['Centro de Ensino'].isin(filtro_centro)]
+    df_filtrado = df_filtrado[df_filtrado['CENTRO DE ENSINO'].isin(filtro_centro)]
 if filtro_acao:
     df_filtrado = df_filtrado[df_filtrado['Tipo de Ação'].isin(filtro_acao)]
 if filtro_status:
@@ -147,26 +129,23 @@ st.markdown("---")
 df_ano = df_filtrado['Ano Projeto'].value_counts().reset_index()
 df_ano.columns = ['Ano', 'Quantidade']
 df_ano = df_ano.sort_values('Ano') 
-
 df_ano['Ano'] = df_ano['Ano'].astype(int).astype(str)
 
 fig_temporal = px.bar(df_ano, x='Ano', y='Quantidade', text_auto=True, 
                       title="Série Temporal: Volume de Ações por Ano (2020-2025)",
                       color_discrete_sequence=[COR_AZUL]) 
-
 fig_temporal.update_xaxes(type='category', title_text="Ano de Início")
-fig_temporal.update_yaxes(title_text="Total de Ações")
+fig_temporal.update_yaxes(title_text="Total de Projetos")
 fig_temporal.update_layout(showlegend=False)
-
 st.plotly_chart(fig_temporal, use_container_width=True)
 
 # ==========================================
-# 8. GRÁFICOS INFERIORES: Centro, Ação e Status
+# 8. GRÁFICOS INFERIORES
 # ==========================================
 col_graf1, col_graf2, col_graf3 = st.columns(3)
 
 with col_graf1:
-    df_centro = df_filtrado['Centro de Ensino'].value_counts().reset_index()
+    df_centro = df_filtrado['CENTRO DE ENSINO'].value_counts().reset_index()
     df_centro.columns = ['Centro de Ensino', 'Quantidade']
     df_centro = df_centro.head(10).sort_values('Quantidade', ascending=True)
     
@@ -200,18 +179,15 @@ with col_graf3:
     st.plotly_chart(fig_status, use_container_width=True)
 
 # ==========================================
-# 9. VISUALIZAÇÃO DOS DADOS BRUTOS
+# 9. VISUALIZAÇÃO DOS DADOS BRUTOS E DOWNLOAD
 # ==========================================
 st.markdown("---")
 st.subheader("📋 Tabela de Dados Detalhada")
 st.dataframe(df_filtrado, use_container_width=True)
 
-# ==========================================
-# 10. BOTÃO DE DOWNLOAD
-# ==========================================
-st.markdown("<br>", unsafe_allow_html=True) # Apenas um espaço em branco para descolar da tabela
+st.markdown("<br>", unsafe_allow_html=True)
 st.download_button(
-    label="📥 Download dos Dados Filtrados (CSV)",
+    label="📥 Baixar Dados Filtrados (CSV)",
     data=df_filtrado.to_csv(index=False, sep=';').encode('utf-8-sig'),
     file_name="dados_extensao_proex.csv",
     mime="text/csv"
