@@ -69,15 +69,15 @@ st.markdown(f"""
 # 4. Carregando os dados
 @st.cache_data
 def carregar_dados():
-    # Caminho relativo para a nuvem
     caminho = 'base_painel_2020_2025.csv'
     dados = pd.read_csv(caminho)
     if len(dados.columns) == 1:
         dados = pd.read_csv(caminho, sep=';')
         
+    # AQUI ESTÁ A CORREÇÃO PRINCIPAL: 'Centro de Ensino'
     ordem_colunas = [
         'Ano Projeto', 'Codigo', 'Tipo de Ação', 'Titulo', 
-        'CENTRO DE ENSINO', 'Data Inicio', 'Data Fim',  
+        'Centro de Ensino', 'Data Inicio', 'Data Fim',  
         'Situacao', 'Status_macro', 'Fonte Financiamento'
     ]
     colunas_existentes = [col for col in ordem_colunas if col in dados.columns]
@@ -96,7 +96,7 @@ with col_filtro1:
     filtro_ano = st.multiselect("Selecione o Ano:", lista_anos)
 
 with col_filtro2:
-    lista_centros = sorted(df['CENTRO DE ENSINO'].astype(str).unique())
+    lista_centros = sorted(df['Centro de Ensino'].astype(str).unique())
     filtro_centro = st.multiselect("Selecione o Centro de Ensino:", lista_centros)
 
 with col_filtro3:
@@ -115,7 +115,7 @@ df_filtrado = df.copy()
 if filtro_ano:
     df_filtrado = df_filtrado[df_filtrado['Ano Projeto'].isin(filtro_ano)]
 if filtro_centro:
-    df_filtrado = df_filtrado[df_filtrado['CENTRO DE ENSINO'].isin(filtro_centro)]
+    df_filtrado = df_filtrado[df_filtrado['Centro de Ensino'].isin(filtro_centro)]
 if filtro_acao:
     df_filtrado = df_filtrado[df_filtrado['Tipo de Ação'].isin(filtro_acao)]
 if filtro_status:
@@ -145,7 +145,7 @@ st.plotly_chart(fig_temporal, use_container_width=True)
 col_graf1, col_graf2, col_graf3 = st.columns(3)
 
 with col_graf1:
-    df_centro = df_filtrado['CENTRO DE ENSINO'].value_counts().reset_index()
+    df_centro = df_filtrado['Centro de Ensino'].value_counts().reset_index()
     df_centro.columns = ['Centro de Ensino', 'Quantidade']
     df_centro = df_centro.head(10).sort_values('Quantidade', ascending=True)
     
