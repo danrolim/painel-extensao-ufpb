@@ -15,9 +15,8 @@ def converter_imagem_local(caminho_imagem):
     return ""
 
 # Caminhos das imagens na sua pasta do projeto
-caminho_pasta = r'G:\Meu Drive\Curso_hastag\Projeto Integrador II'
-img_ufpb_base64 = converter_imagem_local(os.path.join(caminho_pasta, "logo_ufpb.png"))
-img_proex_base64 = converter_imagem_local(os.path.join(caminho_pasta, "logo_proex.png"))
+img_ufpb_base64 = converter_imagem_local("logo_ufpb.png")
+img_proex_base64 = converter_imagem_local("logo_proex.png")
 
 # ==========================================
 # 2. IDENTIDADE VISUAL PROEX (CSS ATUALIZADO)
@@ -84,10 +83,22 @@ st.markdown(f"""
 # 4. Carregando os dados
 @st.cache_data
 def carregar_dados():
-    caminho = r'G:\Meu Drive\Curso_hastag\Projeto Integrador II\base_painel_2020_2025.csv'
+    # O arquivo está na mesma pasta, então basta o nome dele!
+    caminho = 'base_painel_2020_2025.csv'
+    
     dados = pd.read_csv(caminho)
     if len(dados.columns) == 1:
         dados = pd.read_csv(caminho, sep=';')
+        
+    ordem_colunas = [
+        'Ano Projeto', 'Codigo', 'Tipo de Ação', 'Titulo', 
+        'CENTRO DE ENSINO', 'Data Inicio', 'Data Fim',  
+        'Situacao', 'Status_macro', 'Fonte Financiamento'
+    ]
+    
+    colunas_existentes = [col for col in ordem_colunas if col in dados.columns]
+    dados = dados[colunas_existentes]
+    
     return dados
 
 df = carregar_dados()
