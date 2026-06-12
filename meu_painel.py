@@ -135,7 +135,7 @@ fig_temporal = px.bar(df_ano, x='Ano', y='Quantidade', text_auto=True,
                       title="Série Temporal: Volume de Ações por Ano (2020-2025)",
                       color_discrete_sequence=[COR_AZUL]) 
 fig_temporal.update_xaxes(type='category', title_text="Ano de Início")
-fig_temporal.update_yaxes(title_text="Total de Projetos")
+fig_temporal.update_yaxes(title_text="Total de Ações")
 fig_temporal.update_layout(showlegend=False)
 st.plotly_chart(fig_temporal, use_container_width=True)
 
